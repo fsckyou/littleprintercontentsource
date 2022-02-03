@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "local db",
+            "database": "${workspaceFolder:Little Printer Content Source}/lpcs.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

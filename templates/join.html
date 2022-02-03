@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="text-lg font-bold">Join</div>
+<form action="{{ url_for('join') }}" method="post">
+    <div>
+        <label for="username">
+            Username:
+        </label><br>
+        <input type="text" id="username" name="username">
+    </div>
+    <div>
+        <label>
+            Password:
+        </label><br>
+        <input type="password" name="password">
+    </div>
+    <div>
+        <label>
+            Email:
+        </label><br>
+        <input type="text" name="email">
+        <p class="text-sm">(used for gravatar)</p>
+    </div>
+    <button class="mt-2 px-3 py-1 shadow bg-slate-400 hover:bg-slate-300" type="submit">Join</button>
+</form>
+{% endblock %}

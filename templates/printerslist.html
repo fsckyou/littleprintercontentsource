@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+<h1 class="text-xl font-bold text-center">Printers List</h1>
+<div class="flex mt-4">
+{% for printer in printer_list %}
+{% if printer.is_online() %}
+    <div class="flex-auto rounded-md basis-auto bg-green-300 shadow-md p-4 text-center text-black">
+{% else %} 
+    <div class="flex-auto rounded-md basis-auto bg-red-300 shadow-md p-4 text-center text-black"> 
+{% endif %}
+<a class="font-bold"href="{{printer.key_url}}">{{printer.name}}</a>
+<p>a {{printer.type}}</p>
+<p>owned by {{printer.owner.username}}</p>
+<form action="{{ url_for('contentcatalog') }}" method="post">
+    <input type="hidden" id="target_printer" name="target_printer" value="{{printer}}">
+    {% if printer.is_online() %}
+        <button class="mt-2 px-3 py-1 shadow bg-slate-400 hover:bg-slate-300" type="submit">Send content</button>
+        {% else %}
+        <button disabled class="mt-2 px-3 py-1 shadow bg-gray-200 text-red-400" type="submit">Offline :(</button>
+        {% endif %} 
+</form>
+</div>
+{% endfor %}
+<div>
+{% endblock %}
+{% block pages %}
+{% include "includes/pagination.html" %}
+{% endblock pages %}

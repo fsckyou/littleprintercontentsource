@@ -1,0 +1,60 @@
+<!doctype html>
+<html class='h-full'>
+  <head>
+    <title>Little Printer Content Source™</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body class="flex flex-col h-full bg-zinc-900 text-white">
+    <nav class="flex items-center justify-between flex-wrap bg-teal-500 p-6">
+      {% block nav %}
+      <div class="flex items-center flex-shrink-0 text-white mr-6">
+        <span class="font-semibold text-xl tracking-tight">Little Printer Content Source™</span>
+      </div>
+      <div class="block lg:hidden">
+        <button class="flex items-center px-3 py-2 border rounded text-teal-200 border-teal-400 hover:text-white hover:border-white">
+          <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Menu</title><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
+        </button>
+      </div>
+      <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
+        <div class="text-sm lg:flex-grow">
+          {% if session['logged_in'] %}
+          <a href="{{url_for('yourprinters')}}" class="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
+            Your Printers
+          </a>
+          <a href="{{url_for('contentcatalog')}}" class="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
+            Content Sources
+          </a>
+          <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white">
+            Your Friends
+          </a>
+          {% endif %}
+        </div>
+        <div class="text-white flex">
+          {% if session['logged_in'] %}
+            {{session['username']}}
+          {% else %}
+            <div class="mr-4"><a href="{{ url_for('join')}}">Sign Up</a></div>
+            <div><a href="{{ url_for('login')}}">Login</a></div>
+          {% endif %}
+        </div>
+      </div>
+      {% endblock %}
+    </nav>
+
+    {% for message in get_flashed_messages() %}
+      <div class>{{ message }}</div>
+    {% endfor %}
+
+    <main class="flex-grow basis-60 mx-auto p-6">
+      {% block body %}
+      {% endblock %}
+    </main>
+    <div class="flex-1 w-full text-center p-4">
+      {% block pages %}
+      {% endblock pages %}
+    </div>
+    <footer class="w-full bg-slate-300 text-center border-t border-grey p-4 text-black">
+        &copy; Copyright 2022 John Scimone
+    </footer>
+  </body>
+</html>
