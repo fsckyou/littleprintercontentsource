@@ -14,7 +14,7 @@ This project stands up a web interface and set of services to make Little Printe
 - [ ] Image messages
 - [ ] QR code text and links
 - [ ] Message scheduling
-- [x] User accounts
+- [x] ~User accounts~
 
 ## How to build / run
 To build static/style.css, run:
