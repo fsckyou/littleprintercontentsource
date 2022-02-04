@@ -1,4 +1,5 @@
 **__pycache__
 node_modules
 lpcs.db
-static/styles.css
+static/style.css
+.env
