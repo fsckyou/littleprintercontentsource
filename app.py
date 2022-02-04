@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import datetime
+import os
+from dotenv import load_dotenv
 from email.policy import default
 from fileinput import filename
 from functools import wraps
@@ -15,7 +17,9 @@ from flask import (Flask, Response, abort, flash, g, redirect, render_template, 
                    session, template_rendered, url_for)
 from peewee import *
 
-SECRET_KEY = 'hin6bab8ge25*r=x&amp;+5$0kn=-#log$pt^#@vrqjld!^2ci@g*b'
+load_dotenv()
+
+SECRET_KEY = os.getenv('LPCS_SECRET_KEY')
 
 database = SqliteDatabase('lpcs.db', pragmas={'foreign_keys': 1})
 
@@ -286,8 +290,12 @@ def contentcatalog():
 def plaintext():
     if request.method == 'POST':
         if(session["target_printer"]):
-            target_printer = session["target_printer"]
-            print(session["target_printer"])
+            target_printer: Printer = Printer.get(session.get("target_printer"))
+            if target_printer.is_online():
+                target_printer.print_plain_text(request.form["message"],session.get("username"))
+                flash("Message sent!")
+            else:
+                flash("Couldn't send message. Printer is offline.")
         else:
             print("no printer yet")
     return render_template('plaintext.html')

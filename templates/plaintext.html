@@ -1,5 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
 <h1 class="text-xl font-bold text-center">Plain Text</h1>
-<p>{{session["target_printer"]}}</p>
+<form action="{{ url_for('plaintext') }}" method="post">
+    <div>
+        <label for="message">
+            Message:
+        </label><br>
+        <input class="bg-inherit" type="text" id="message" name="message">
+    </div>
+    <button class="mt-2 px-3 py-1 shadow bg-slate-400 hover:bg-slate-300" type="submit">Send it!</button>
+</form>
 {% endblock %}
