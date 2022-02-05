@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
-<h1 class="text-xl font-bold text-center">Plain Text</h1>
-<form action="{{ url_for('plaintext') }}" method="post">
-    <div>
-        <label for="message">
+<div class="text-xl font-bold text-center mb-3">Plain Text</div>
+<form class="text-center" action="{{ url_for('plaintext') }}" method="post">
+    <div class=" mb-6">
+        <label class="block mb-2 text-sm" for="message">
             Message:
-        </label><br>
+        </label>
         <input class="bg-inherit" type="text" id="message" name="message">
     </div>
-    <button class="mt-2 px-3 py-1 shadow bg-slate-400 hover:bg-slate-300" type="submit">Send it!</button>
+    <div>
+        <button class="mt-2 px-3 py-1 shadow bg-slate-400 hover:bg-slate-300" type="submit">Send it!</button>
+    </div>
 </form>
 {% endblock %}

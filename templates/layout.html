@@ -3,49 +3,114 @@
   <head>
     <title>Little Printer Content Source™</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='flash.min.css')}}">
+    <link rel=stylesheet href="{{ url_for('static', filename='all.min.css')}}"
   </head>
   <body class="flex flex-col h-full bg-zinc-900 text-white">
-    <nav class="flex items-center justify-between flex-wrap bg-teal-500 p-6">
-      {% block nav %}
-      <div class="flex items-center flex-shrink-0 text-white mr-6">
-        <span class="font-semibold text-xl tracking-tight">Little Printer Content Source™</span>
-      </div>
-      <div class="block lg:hidden">
-        <button class="flex items-center px-3 py-2 border rounded text-teal-200 border-teal-400 hover:text-white hover:border-white">
-          <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Menu</title><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
-        </button>
-      </div>
-      <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
-        <div class="text-sm lg:flex-grow">
-          {% if session['logged_in'] %}
-          <a href="{{url_for('yourprinters')}}" class="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
-            Your Printers
-          </a>
-          <a href="{{url_for('contentcatalog')}}" class="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
-            Content Sources
-          </a>
-          <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white">
-            Your Friends
-          </a>
-          {% endif %}
+    <!-- This example requires Tailwind CSS v2.0+ -->
+    <nav class="bg-gray-800">
+      <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div class="relative flex items-center justify-between h-16">
+          <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+            <!-- Mobile menu button-->
+            <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+              <span class="sr-only">Open main menu</span>
+              <!--
+                Icon when menu is closed.
+
+                Heroicon name: outline/menu
+
+                Menu open: "hidden", Menu closed: "block"
+              -->
+              <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <!--
+                Icon when menu is open.
+
+                Heroicon name: outline/x
+
+                Menu open: "block", Menu closed: "hidden"
+              -->
+              <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
+            <div class="flex-shrink-0 flex items-center">
+              <img class="block lg:hidden h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Workflow">
+              <img class="hidden lg:block h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg" alt="Workflow">
+            </div>
+            <div class="hidden sm:block sm:ml-6">
+              <div class="flex space-x-4">
+                <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
+                <a href="{{url_for('homepage')}}" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Home</a>
+
+                {% if session['logged_in'] %}
+                <a href="{{url_for('printers',username=session.get('username'))}}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                  Your Printers
+                </a>
+                <a href="#responsive-header" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                  Your Friends
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+
+            <!-- Profile dropdown -->
+            <div class="ml-3 relative">
+              <div>
+                <button type="button" class="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                  <span class="sr-only">Open user menu</span>
+                  {% if session['logged_in'] %}
+                  <div id="dropdown-area">
+                  {{session['username']}}
+                  </div>
+                {% else %}
+                  <div class="mr-4"><a href="{{ url_for('join')}}">Sign Up</a></div>
+                  <div><a href="{{ url_for('login')}}">Login</a></div>
+                {% endif %}
+                </button>
+              </div>
+
+              <!--
+                Dropdown menu, show/hide based on menu state.
+
+                Entering: "transition ease-out duration-100"
+                  From: "transform opacity-0 scale-95"
+                  To: "transform opacity-100 scale-100"
+                Leaving: "transition ease-in duration-75"
+                  From: "transform opacity-100 scale-100"
+                  To: "transform opacity-0 scale-95"
+              -->
+              <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                <!-- Active: "bg-gray-100", Not Active: "" -->
+                <a href="{{url_for('logout')}}" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="text-white flex">
-          {% if session['logged_in'] %}
-            {{session['username']}}
-          {% else %}
-            <div class="mr-4"><a href="{{ url_for('join')}}">Sign Up</a></div>
-            <div><a href="{{ url_for('login')}}">Login</a></div>
-          {% endif %}
+      </div>
+
+      <!-- Mobile menu, show/hide based on menu state. -->
+      <div class="sm:hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+          <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
+          <a href="#" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium" aria-current="page">Dashboard</a>
+
+          <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Team</a>
+
+          <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Projects</a>
+
+          <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Calendar</a>
         </div>
       </div>
-      {% endblock %}
     </nav>
 
-    {% for message in get_flashed_messages() %}
-      <div class>{{ message }}</div>
-    {% endfor %}
-
-    <main class="flex-grow basis-60 mx-auto p-6">
+    <main class="flex-1 w-full p-6 justify-center">
       {% block body %}
       {% endblock %}
     </main>
@@ -56,5 +121,36 @@
     <footer class="w-full bg-slate-300 text-center border-t border-grey p-4 text-black">
         &copy; Copyright 2022 John Scimone
     </footer>
+
+    <script src="/static/jquery.min.js"></script>
+    <script src="/static/flash.min.js"></script>
+    <script src="/static/flash.jquery.min.js"></script>
+    <script>
+      $('document').ready(function () {
+        {% for message in get_flashed_messages(with_categories=True) %}        
+        window.FlashMessage.{{message[0]}}('{{message[1]}}', {
+          progress: true,
+          interactive: true,
+          timeout: 5000,
+          appear_delay: 200,
+          container: '.flash-container',
+          theme: 'dark',
+          classes: {
+              container: 'flash-container',
+              flash: 'flash-message',
+              visible: 'is-visible',
+              progress: 'flash-progress',
+              progress_hidden: 'is-hidden'
+          }
+        });
+        {% endfor %}
+        $('div[role=menu]').hide()
+        $('#dropdown-area').mousedown(function() {
+          $('div[role=menu]').slideDown(function() {
+            $('div[role=menu]').delay(5000).slideUp()
+          });
+        });
+      });
+    </script>
   </body>
 </html>

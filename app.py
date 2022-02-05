@@ -57,7 +57,20 @@ class User(BaseModel):
     def gravatar_url(self, size=80):
         return 'http://www.gravatar.com/avatar/%s?d=identicon&s=%d' % \
             (md5(self.email.strip().lower().encode('utf-8')).hexdigest(), size)
-
+    
+    def get_public_printers(self):
+        public_printers: list[Printer] = []
+        for printer in self.printers:
+            if Printer(printer).accessibility == 2:
+                public_printers.append(printer)
+        return public_printers
+    
+    def get_friend_printers(self):
+        friend_printers: list[Printer] = []
+        for printer in self.printers:
+            if Printer(printer).accessibility >= 1:
+                friend_printers.append(printer)
+        return friend_printers
 
 class Printer(BaseModel):
     """Generic Printer Interface"""
@@ -120,8 +133,9 @@ class ContentSource:
     url: str
 
 class ContentPlainText(ContentSource):
-    name = "Send Plain Text"
+    name = "Plain Text"
     route = "plaintext"
+    description = """This will send raw unformatted text to the printer. Simple."""
     
     def print_text(self, text_to_print:str , target_printer:Printer, from_user:User):
         target_printer.print_plain_text(text_to_print,from_user.username)
@@ -171,7 +185,7 @@ def auth_user(user):
     session['logged_in'] = True
     session['user_id'] = user.id
     session['username'] = user.username
-    flash('You are logged in as %s' % (user.username))
+    flash('You are logged in as %s' % (user.username),'info')
 
 # get the user from the session
 
@@ -210,19 +224,12 @@ def after_request(response):
 
 # views -- these are the actual mappings of url to view function
 
-
-@app.route('/favicon.ico')
-def favicon():
-    # just get the favicon in the static directory I guess?
-    return redirect(url_for('static', filename='favicon.ico'))
-
-
 @app.route('/')
 def homepage():
     # depending on whether the requesting user is logged in or not, show them
     # either the public timeline or their own private timeline
-    if session.get('logged_in'):
-        return redirect(url_for('contentcatalog'))
+    # if session.get('logged_in'):
+    #     return redirect(url_for('printers',username=session.get('username')))
     return render_template('homepage.html')
 
 
@@ -259,7 +266,7 @@ def login():
                 (User.username == request.form['username']) &
                 (User.password == pw_hash))
         except User.DoesNotExist:
-            flash('The password entered is incorrect')
+            flash('The password entered is incorrect','error')
         else:
             auth_user(user)
             return redirect(url_for('homepage'))
@@ -270,20 +277,21 @@ def login():
 @app.route('/logout/')
 def logout():
     session.pop('logged_in', None)
-    flash('You were logged out')
+    flash('You were logged out','info')
     return redirect(url_for('homepage'))
 
 
 @app.route('/contentcatalog/', methods=['GET','POST'])
 @login_required
 def contentcatalog():
-    kargs= {"content_sources": content_sources}
-    if request.method == 'POST' and request.form["target_printer"]:
-        session["target_printer"] = request.form["target_printer"]
-        return render_template('contentcatalog.html',**kargs)
+    if request.method == 'POST':
+        if request.form["target_printer"]:
+            session["target_printer"] = request.form["target_printer"]
+            session["target_printer_name"] = Printer.get(request.form["target_printer"]).name
+            return render_template('contentcatalog.html', content_sources=content_sources)
     else: 
         session["target_printer"] = None
-        return render_template('contentcatalog.html',**kargs)
+        return render_template('contentcatalog.html', content_sources=content_sources, read_only=True)
 
 @app.route('/plaintext/', methods=['GET','POST'])
 @login_required
@@ -291,21 +299,29 @@ def plaintext():
     if request.method == 'POST':
         if(session["target_printer"]):
             target_printer: Printer = Printer.get(session.get("target_printer"))
+            # clear this stuff cuz we're just gonna send.
+            session["content_type"] = None
+            session["content_to_send"] = None
             if target_printer.is_online():
                 target_printer.print_plain_text(request.form["message"],session.get("username"))
-                flash("Message sent!")
+                flash("Message sent!",'info')
             else:
-                flash("Couldn't send message. Printer is offline.")
+                flash("Couldn't send message. Printer is offline.","error")
         else:
-            print("no printer yet")
+            session["content_type"] = "plaintext"
+            session["content_to_send"] = request.form["message"]
+            return redirect(url_for('printers',username=session.get('username')))
     return render_template('plaintext.html')
 
-@app.route('/yourprinters/')
+@app.route('/printers/<username>')
 @login_required
-def yourprinters():
-    userid = session.get('user_id')
-    user = User.get_by_id(userid)
-    printers = user.printers
+def printers(username):
+    user: User = User.get(User.username == username)
+    if session.get('user_id') == user.get_id():
+        # they're your printers, you see all of 'em.
+        printers = user.printers
+    else:
+        printers = user.get_public_printers()
     return object_list('printerslist.html', printers, 'printer_list', user=user)
 
 
@@ -317,7 +333,7 @@ def addprinter():
                                      key_url=request.form['key_url'],
                                      owner=User.get_by_id(1)
                                      )
-        return redirect(url_for('yourprinters'))
+        return redirect(url_for('printers'))
     return render_template('addprinter.html')
 
 
@@ -325,3 +341,15 @@ def addprinter():
 if __name__ == '__main__':
     create_tables()
     app.run()
+
+#### THIS PART IS DUMB - REMOVE WHEN THIS IS ACTUALLY DEPLOYED WITH A SERVER
+@app.route('/favicon.ico')
+def favicon():
+    # just get the favicon in the static directory I guess?
+    return redirect(url_for('static', filename='favicon.ico'))
+
+#### THIS PART IS DUMB - REMOVE WHEN THIS IS ACTUALLY DEPLOYED WITH A SERVER
+@app.route('/webfonts/<filename>')
+def webfonts(filename):
+    # just get the favicon in the static directory I guess?
+    return redirect(url_for('static', filename=filename))
