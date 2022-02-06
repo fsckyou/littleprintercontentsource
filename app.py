@@ -287,7 +287,7 @@ def contentcatalog():
     if request.method == 'POST':
         if request.form["target_printer"]:
             session["target_printer"] = request.form["target_printer"]
-            session["target_printer_name"] = Printer.get(request.form["target_printer"]).name
+            session["target_printer_name"] = Printer.get_by_id(request.form["target_printer"]).name
             return render_template('contentcatalog.html', content_sources=content_sources)
     else: 
         session["target_printer"] = None
@@ -298,7 +298,7 @@ def contentcatalog():
 def plaintext():
     if request.method == 'POST':
         if(session["target_printer"]):
-            target_printer: Printer = Printer.get(session.get("target_printer"))
+            target_printer: Printer = Printer.get_by_id(session.get("target_printer"))
             # clear this stuff cuz we're just gonna send.
             session["content_type"] = None
             session["content_to_send"] = None
@@ -331,9 +331,9 @@ def addprinter():
         if request.form['type'] == "LittlePrinter":
             printer = Printer.create(name=request.form['name'],
                                      key_url=request.form['key_url'],
-                                     owner=User.get_by_id(1)
+                                     owner=User.get_by_id(session.get('user_id'))
                                      )
-        return redirect(url_for('printers'))
+        return redirect(url_for('printers',username=session.get('username')))
     return render_template('addprinter.html')
 
 

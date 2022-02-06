@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="text-lg font-bold">Add a printer</div>
-<form action="{{ url_for('addprinter') }}" method="post">
+<div class="text-lg font-bold text-center">Add a printer</div>
+<form class="text-center" action="{{ url_for('addprinter') }}" method="post">
     <div>
         <label>
             Printer Name:
